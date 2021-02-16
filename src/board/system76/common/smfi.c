@@ -306,6 +306,13 @@ static enum Result cmd_spi(void) {
 }
 
 static enum Result cmd_reset(void) {
+#if !defined(__SCRATCH__)
+    if (security_get() != SECURITY_STATE_UNLOCK) {
+        // EC must be unlocked to allow watchdog reset
+        return RES_ERR;
+    }
+#endif // !defined(__SCRATCH__)
+
     // Attempt to trigger watchdog reset
     ETWCFG |= (1 << 5);
     EWDKEYR = 0;

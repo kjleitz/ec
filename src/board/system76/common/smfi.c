@@ -291,6 +291,11 @@ static enum Result cmd_spi(void) {
 #if defined(__SCRATCH__)
     return cmd_spi_scratch();
 #else // defined(__SCRATCH__)
+    if (security_get() != SECURITY_STATE_UNLOCK) {
+        // EC must be unlocked to allow flashing
+        return RES_ERR;
+    }
+
     if (smfi_cmd[SMFI_CMD_DATA] & CMD_SPI_FLAG_SCRATCH) {
         scratch_trampoline();
     }

@@ -13,6 +13,7 @@
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
+#include <board/security.h>
 #include <common/debug.h>
 
 #include <ec/espi.h>
@@ -360,6 +361,8 @@ void power_cpu_reset(void) {
     fan_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
+    // Notify security that we reset
+    security_reset();
 }
 
 static bool power_button_disabled(void) {

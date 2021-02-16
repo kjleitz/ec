@@ -21,6 +21,7 @@
     #include <board/scratch.h>
     #include <board/kbled.h>
     #include <board/keymap.h>
+    #include <board/security.h>
 #endif
 #include <board/smfi.h>
 #include <common/command.h>
@@ -232,6 +233,20 @@ static enum Result cmd_led_set_color(void) {
         return RES_ERR;
     }
 }
+
+static enum Result cmd_security_get(void) {
+    smfi_cmd[SMFI_CMD_DATA] = security_get();
+    return RES_OK;
+}
+
+static enum Result cmd_security_set(void) {
+    enum SecurityState state = smfi_cmd[SMFI_CMD_DATA];
+    if (security_set(state)) {
+        return RES_OK;
+    } else {
+        return RES_ERR;
+    }
+}
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -356,6 +371,12 @@ void smfi_event(void) {
                 break;
             case CMD_LED_SET_COLOR:
                 smfi_cmd[SMFI_CMD_RES] = cmd_led_set_color();
+                break;
+            case CMD_SECURITY_GET:
+                smfi_cmd[SMFI_CMD_RES] = cmd_security_get();
+                break;
+            case CMD_SECURITY_SET:
+                smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
                 break;
 #endif // !defined(__SCRATCH__)
             case CMD_SPI:

@@ -275,7 +275,10 @@ unsafe fn security_get() -> Result<(), Error> {
 unsafe fn security_set(state: SecurityState) -> Result<(), Error> {
     let mut ec = ec()?;
 
-    ec.security_set(state)
+    ec.security_set(state)?;
+    println!("Shut down the system for the security state to take effect");
+
+    Ok(())
 }
 
 fn usage() {

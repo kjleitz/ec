@@ -8,7 +8,7 @@
 #include <common/command.h>
 
 enum SecurityState security_get(void);
-void security_reset(void);
 bool security_set(enum SecurityState state);
+bool security_power(void);
 
 #endif // _BOARD_SECURITY_H

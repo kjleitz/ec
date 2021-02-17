@@ -9,29 +9,30 @@ enum SecurityState security_get(void) {
     return security_state;
 }
 
-void security_reset(void) {
-    // Apply prepare states on CPU reset
-    switch (security_state) {
+bool security_set(enum SecurityState state) {
+    switch (state) {
+        // Allow perpare states to be set
         case SECURITY_STATE_PREPARE_LOCK:
-            security_state = SECURITY_STATE_LOCK;
-            break;
         case SECURITY_STATE_PREPARE_UNLOCK:
-            security_state = SECURITY_STATE_UNLOCK;
-            break;
+            security_state = state;
+            return true;
+        // Any other states will be ignored
+        default:
+            return false;
     }
 }
 
-bool security_set(enum SecurityState state) {
-    switch (state) {
-        // Prepare to lock by setting ME_WE low
+bool security_power(void) {
+    switch (security_state) {
+        // Apply lock state and power on
         case SECURITY_STATE_PREPARE_LOCK:
             gpio_set(&ME_WE, false);
-            security_state = state;
+            security_state = SECURITY_STATE_LOCK;
             return true;
-        // Prepare to unlock by setting ME_WE high
+        // Apply unlock state and power on
         case SECURITY_STATE_PREPARE_UNLOCK:
             gpio_set(&ME_WE, true);
-            security_state = state;
+            security_state = SECURITY_STATE_UNLOCK;
             return true;
         // Any other states will be ignored
         default:

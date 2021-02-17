@@ -361,8 +361,6 @@ void power_cpu_reset(void) {
     fan_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
-    // Notify security that we reset
-    security_reset();
 }
 
 static bool power_button_disabled(void) {
@@ -542,6 +540,11 @@ void power_event(void) {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
             power_off_s5();
+
+            // Handle security state changes if necessary
+            if (security_power()) {
+                power_on_s5();
+            }
         }
     }
 

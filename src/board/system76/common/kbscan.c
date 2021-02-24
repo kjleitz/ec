@@ -11,6 +11,7 @@
 #include <board/lid.h>
 #include <board/pmc.h>
 #include <board/power.h>
+#include <common/macro.h>
 #include <common/debug.h>
 
 // Default to not n-key rollover
@@ -62,7 +63,7 @@ void kbscan_init(void) {
 static uint8_t kbscan_get_row(int i) {
     // Set current line as output
     if (i < 8) {
-        KSOLGOEN = 1 << i;
+        KSOLGOEN = BIT(i);
         KSOHGOEN = 0;
 #if KM_OUT >= 17
         GPCRC3 = GPIO_IN;
@@ -72,7 +73,7 @@ static uint8_t kbscan_get_row(int i) {
 #endif
     } else if (i < 16) {
         KSOLGOEN = 0;
-        KSOHGOEN = 1 << (i - 8);
+        KSOHGOEN = BIT((i - 8));
 #if KM_OUT >= 17
         GPCRC3 = GPIO_IN;
 #endif
@@ -99,10 +100,10 @@ static uint8_t kbscan_get_row(int i) {
 #endif
     }
 #if KM_OUT >= 17
-    GPDRC &= ~(1 << 3);
+    GPDRC &= ~BIT(3);
 #endif
 #if KM_OUT >= 18
-    GPDRC &= ~(1 << 5);
+    GPDRC &= ~BIT(5);
 #endif
 
     // TODO: figure out optimal delay
@@ -129,8 +130,8 @@ static uint8_t kbscan_get_real_keys(int row, uint8_t rowdata) {
     for (uint8_t col = 0; col < KM_IN; col++) {
         // This tests the default keymap intentionally, to avoid blanks in the
         // dynamic keymap
-        if (KEYMAP[0][row][col] && (rowdata & (1 << col))) {
-            realdata |=  1 << col;
+        if (KEYMAP[0][row][col] && (rowdata & BIT(col))) {
+            realdata |=  BIT(col);
         }
     }
 
@@ -327,8 +328,8 @@ void kbscan_event(void) {
             // A key was pressed or released
             int j;
             for (j = 0; j < KM_IN; j++) {
-                bool new_b = new & (1 << j);
-                bool last_b = last & (1 << j);
+                bool new_b = new & BIT(j);
+                bool last_b = last & BIT(j);
                 if (new_b != last_b) {
                     bool reset = false;
 
@@ -380,9 +381,9 @@ void kbscan_event(void) {
                     // Reset bit to last state
                     if (reset) {
                         if (last_b) {
-                            new |= (1 << j);
+                            new |= BIT(j);
                         } else {
-                            new &= ~(1 << j);
+                            new &= ~BIT(j);
                         }
                     }
                 }

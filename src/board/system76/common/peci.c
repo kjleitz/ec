@@ -58,7 +58,7 @@ static struct Fan __code FAN = {
 
 void peci_init(void) {
     // Allow PECI pin to be used
-    GCR2 |= (1 << 4);
+    GCR2 |= BIT(4);
 
     // Set frequency to 1MHz
     HOCTL2R = 0x01;
@@ -75,7 +75,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     HOSTAR = HOSTAR;
 
     // Enable PECI, clearing data fifo's, enable AW_FCS
-    HOCTLR = (1 << 5) | (1 << 3) | (1 << 1);
+    HOCTLR = BIT(5) | BIT(3) | BIT(1);
     // Set address to default
     HOTRADDR = 0x30;
     // Set write length
@@ -105,7 +105,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     while (HOSTAR & 1) {}
 
     int status = (int)HOSTAR;
-    if (status & (1 << 1)) {
+    if (status & BIT(1)) {
         int cc = (int)HORDDR;
         if (cc & 0x80) {
             return -cc;
@@ -135,7 +135,7 @@ void peci_event(void) {
         HOSTAR = HOSTAR;
 
         // Enable PECI, clearing data fifo's
-        HOCTLR = (1 << 5) | (1 << 3);
+        HOCTLR = BIT(5) | BIT(3);
         // Set address to default
         HOTRADDR = 0x30;
         // Set write length
@@ -150,7 +150,7 @@ void peci_event(void) {
         // Wait for completion
         while (HOSTAR & 1) {}
 
-        if (HOSTAR & (1 << 1)) {
+        if (HOSTAR & BIT(1)) {
             // Use result if finished successfully
             uint8_t low = HORDDR;
             uint8_t high = HORDDR;

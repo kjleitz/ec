@@ -13,12 +13,14 @@ struct Gpio {
     uint8_t value;
 };
 
+// clang-format off
 #define GPIO(BLOCK, NUMBER) { \
     .data = &GPDR ## BLOCK, \
     .mirror = &GPDMR ## BLOCK, \
     .control = &GPCR ## BLOCK ## NUMBER, \
     .value = (1 << NUMBER), \
 }
+// clang-format on
 
 bool gpio_get(struct Gpio * gpio);
 void gpio_set(struct Gpio * gpio, bool value);

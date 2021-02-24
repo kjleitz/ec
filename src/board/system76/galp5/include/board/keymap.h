@@ -13,6 +13,7 @@
 // common/keymap.h requires KM_LAY, KM_OUT, and KM_IN definitions
 #include <common/keymap.h>
 
+// clang-format off
 // Conversion of physical layout to keyboard matrix
 #define LAYOUT( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, K0E, K0F, K0G, \
@@ -40,6 +41,7 @@
     { ___, K2D, K60, K1D, K57, K0F, ___, K0G }, \
     { ___, ___, K3C, ___, K61, K0C, ___, K59 } \
 }
+// clang-format on
 
 // Position of physical Esc key in the matrix
 #define MATRIX_ESC_INPUT    7

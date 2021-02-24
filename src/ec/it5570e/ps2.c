@@ -4,12 +4,14 @@
 
 #include <ec/ps2.h>
 
+// clang-format off
 #define PS2(NUM) { \
     .control = &PSCTL ## NUM, \
     .interrupt = &PSINT ## NUM, \
     .status = &PSSTS ## NUM, \
     .data = &PSDAT ## NUM, \
 }
+// clang-format on
 
 #define PS2_TIMEOUT 10000
 

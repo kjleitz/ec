@@ -5,12 +5,16 @@ on:
   pull_request:
 
 jobs:
-  spdx:
+  lint:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Check SPDX identifiers
         run: ./scripts/spdx.sh
+
+      - name: Check formatting
+        run: ./scripts/clang-format.sh
+        continue-on-error: true
 
   tool:
     runs-on: ubuntu-20.04

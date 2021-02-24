@@ -18,6 +18,7 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         --yes \
         avr-libc \
         avrdude \
+        clang-format \
         curl \
         gcc-avr \
         libudev-dev \
@@ -29,6 +30,7 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avr-gcc \
         avr-libc \
         avrdude \
+        clang-tools-extra \
         curl \
         make \
         sdcc \

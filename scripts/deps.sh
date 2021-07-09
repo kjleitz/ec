@@ -13,16 +13,21 @@ source /etc/os-release
 
 msg "Installing system build dependencies"
 if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
+    sudo apt-get update
     sudo apt-get install \
         --no-install-recommends \
         --yes \
         avr-libc \
         avrdude \
         curl \
+        gcc \
         gcc-avr \
+        libc-dev \
         libudev-dev \
         make \
-        sdcc
+        pkgconf \
+        sdcc \
+        xxd
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
     sudo dnf install \
         --assumeyes \
@@ -30,9 +35,24 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avr-libc \
         avrdude \
         curl \
+        gcc \
         make \
         sdcc \
-        systemd-devel
+        systemd-devel \
+        vim-common
+elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
+    sudo pacman -S \
+        --noconfirm \
+        avr-gcc \
+        avr-libc \
+        avrdude \
+        curl \
+        gcc \
+        make \
+        pkgconf \
+        sdcc \
+        systemd-libs \
+        vim
 else
     msg "Please add support for your distribution to:"
     msg "scripts/deps.sh"

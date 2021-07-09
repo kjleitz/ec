@@ -12,7 +12,7 @@
 
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_HEATUP
-    #define BOARD_HEATUP 10
+    #define BOARD_HEATUP 4
 #endif
 
 static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
@@ -30,7 +30,7 @@ static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 bool peci_on = false;
 int16_t peci_temp = 0;
 
-#define PECI_TEMP(X) (((int16_t)(X)) << 6)
+#define PECI_TEMP(X) ((int16_t)(X))
 
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
 
@@ -54,12 +54,12 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = false,
+    .interpolate = SMOOTH_FANS != 0,
 };
 
 void peci_init(void) {
     // Allow PECI pin to be used
-    GCR2 |= (1 << 4);
+    GCR2 |= BIT(4);
 
     // Set frequency to 1MHz
     HOCTL2R = 0x01;
@@ -76,7 +76,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     HOSTAR = HOSTAR;
 
     // Enable PECI, clearing data fifo's, enable AW_FCS
-    HOCTLR = (1 << 5) | (1 << 3) | (1 << 1);
+    HOCTLR = BIT(5) | BIT(3) | BIT(1);
     // Set address to default
     HOTRADDR = 0x30;
     // Set write length
@@ -106,7 +106,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     while (HOSTAR & 1) {}
 
     int status = (int)HOSTAR;
-    if (status & (1 << 1)) {
+    if (status & BIT(1)) {
         int cc = (int)HORDDR;
         if (cc & 0x80) {
             return -cc;
@@ -119,7 +119,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 }
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
-void peci_event(void) {
+uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
 #if EC_ESPI
@@ -137,7 +137,7 @@ void peci_event(void) {
         HOSTAR = HOSTAR;
 
         // Enable PECI, clearing data fifo's
-        HOCTLR = (1 << 5) | (1 << 3);
+        HOCTLR = BIT(5) | BIT(3);
         // Set address to default
         HOTRADDR = 0x30;
         // Set write length
@@ -152,11 +152,11 @@ void peci_event(void) {
         // Wait for completion
         while (HOSTAR & 1) {}
 
-        if (HOSTAR & (1 << 1)) {
+        if (HOSTAR & BIT(1)) {
             // Use result if finished successfully
             uint8_t low = HORDDR;
             uint8_t high = HORDDR;
-            uint16_t peci_offset = ((int16_t)high << 8) | (int16_t)low;
+            uint16_t peci_offset = (((int16_t)high << 8) | (int16_t)low) >> 6;
 
             peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
             duty = fan_duty(&FAN, peci_temp);
@@ -180,8 +180,6 @@ void peci_event(void) {
         duty = fan_cooldown(&FAN, duty);
     }
 
-    if (duty != DCR2) {
-        DCR2 = duty;
-        DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
-    }
+    DEBUG("PECI temp=%d\n", peci_temp);
+    return duty;
 }
